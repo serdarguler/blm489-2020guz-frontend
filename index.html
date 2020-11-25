@@ -13,6 +13,8 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
         integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
         crossorigin="anonymous"></script>
@@ -27,23 +29,50 @@
 </head>
 
 <body>
-    <h1>BLM 489</h1>
-    <div class="container" id="app">
-        <div class="form-group">
-            <label for="exampleInputEmail1">Ad Soyad</label>
-            <input class="form-control" v-model="ogrenci.adSoyad" id="asasd" aria-describedby="emailHelp">
-        </div>
-        <div class="form-group">
-            <label for="exampleInputPassword1">T.C. Kimlik No</label>
-            <input v-model="ogrenci.tckimlikNo" class="form-control" id="tckimlikNo">
-        </div>
-        <div class="form-group">
-            <label for="exampleInputPassword1">Öğrenci No</label>
-            <input v-model="ogrenci.ogrenciNo" class="form-control" id="ogrenciNo">
-        </div>
-        <button type="submit" v-if="ogrenci.id === undefined" v-on:click="kaydet" class="btn btn-primary">Kaydet</button>
-        <button type="submit" v-if="ogrenci.id !== undefined" v-on:click="guncelle" class="btn btn-primary">Güncelle</button>
+    <div id="app">
+        <h1>BLM 489</h1>
+        <div class="container" id="app">
+            <div class="form-group">
+                <label for="exampleInputEmail1">Ad Soyad</label>
+                <input class="form-control" v-model="ogrenci.adSoyad" id="asasd" aria-describedby="emailHelp">
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">T.C. Kimlik No</label>
+                <input v-model="ogrenci.tckimlikNo" class="form-control" id="tckimlikNo">
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Öğrenci No</label>
+                <input v-model="ogrenci.ogrenciNo" class="form-control" id="ogrenciNo">
+            </div>
+            <button type="submit" v-if="ogrenci.id === undefined" v-on:click="kaydet"
+                class="btn btn-primary">Kaydet</button>
+            <button type="submit" v-if="ogrenci.id !== undefined" v-on:click="guncelle"
+                class="btn btn-primary">Güncelle</button>
 
+        </div>
+        <div style="margin-top: 30px;">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Öğrenci No</th>
+                        <th scope="col">Ad Soyad</th>
+                        <th scope="col">T.C. Kimlik No</th>
+                        <th scope="col">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="o in ogrenciList">
+                        <th scope="row">{{o.ogrenciNo}}</th>
+                        <td>{{o.adSoyad}}</td>
+                        <td>{{o.tckimlikNo}}</td>
+                        <td>
+                            <i v-on:click="selectOgrenci(o)" class="fa fa-edit"></i>
+                            <i v-on:click="deleteOgrenci(o)" class="fa fa-trash"></i>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 <script>
@@ -51,6 +80,7 @@
         el: '#app',
         data: {
             ogrenci: {},
+            ogrenciList: []
         },
         methods: {
             kaydet: function (event) {
@@ -62,6 +92,15 @@
                     }
 
                 });
+                this.fillTable();
+            },
+            selectOgrenci: function (ogrenci) {
+                this.ogrenci = ogrenci;
+            },
+            deleteOgrenci : function(ogrenci){
+                axios.delete("/api/ogrenci/"+ogrenci.id).then(resp => {
+                    this.fillTable();
+                });
             },
             guncelle: function (event) {
                 //console.log(this.ogrenci);
@@ -72,14 +111,17 @@
                     }
 
                 });
-            }
+                this.fillTable();
+            },
+            fillTable: function () {
+                axios.get("/api/ogrenci").then(resp => {
+                    this.ogrenciList = resp.data;
+                });
+            },
         },
-        mounted(){
-            let id = window.location.href.split("?")[1];
-            //let _this = this;
-            axios.get("/api/ogrenci/"+id).then(resp => {
-                this.ogrenci = resp.data;
-            })
+
+        mounted() {
+            this.fillTable();
         }
     })
 </script>
