@@ -97,8 +97,8 @@
             selectOgrenci: function (ogrenci) {
                 this.ogrenci = ogrenci;
             },
-            deleteOgrenci : function(ogrenci){
-                axios.delete("/api/ogrenci/"+ogrenci.id).then(resp => {
+            deleteOgrenci: function (ogrenci) {
+                axios.delete("/api/ogrenci/" + ogrenci.id).then(resp => {
                     this.fillTable();
                 });
             },
@@ -120,7 +120,17 @@
             },
         },
 
-        mounted() {
+        async mounted() {
+            let basicAuth = sessionStorage.getItem("basicAuth");
+            await axios.get("/api/login", {
+                headers: { 'Authorization':  'Basic ' + basicAuth }
+            }).then(resp => {
+                if (!resp.data === "OK") {
+                    window.location.href = "login.html"
+                }
+            }).catch(error=>{
+                window.location.href = "login.html";
+            });
             this.fillTable();
         }
     })
